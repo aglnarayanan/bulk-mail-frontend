@@ -7,6 +7,10 @@ function App() {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
 
+  // ✅ Use environment variable for backend URL
+  const API_URL = import.meta.env.VITE_API_URL; // If Vite
+  // const API_URL = process.env.REACT_APP_API_URL; // If Create React App
+
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
@@ -35,21 +39,26 @@ function App() {
       return;
     }
 
-    const res = await fetch("http://localhost:5000/send-bulk-mail", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        recipients: emails,
-        subject,
-        message,
-      }),
-    });
+    try {
+      const res = await fetch(`${API_URL}/send-bulk-mail`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          recipients: emails,
+          subject,
+          message,
+        }),
+      });
 
-    const data = await res.json();
-    console.log(data);
-    alert(`Mail send status: ${data.status}`);
+      const data = await res.json();
+      console.log(data);
+      alert(`Mail send status: ${data.status}`);
+    } catch (error) {
+      console.error("❌ Error sending mail:", error);
+      alert("Something went wrong. Check console.");
+    }
   };
 
   return (
